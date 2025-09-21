@@ -87,16 +87,88 @@ def depthFirstSearch(problem: SearchProblem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
+    seen = set([problem.getStartState()])
+    def recurSearch(curLoc, actions):
+        if problem.isGoalState(curLoc):
+            return actions
+        for successor in reversed(problem.getSuccessors(curLoc)): # list of triplet(s)
+            next_loc = successor[0] 
+            if next_loc not in seen:
+                seen.add(next_loc)
+                next_actions = actions.copy()
+                next_actions.append(successor[1])
+                ans =  recurSearch(next_loc, next_actions)
+                
+                if ans is not None:
+                    return ans
+        return None
+    ans = recurSearch(problem.getStartState(), [])
+    return ans
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    seen = set([problem.getStartState()])
+    q_ = util.Queue()
+    q_.push((problem.getStartState(), []))
+    seen = set([problem.getStartState()])
+    while not q_.isEmpty():
+        cur, actions = q_.pop()
+        if problem.isGoalState(cur):
+            return actions
+        for suc in problem.getSuccessors(cur):
+            next_loc = suc[0]
+            if next_loc not in seen:
+                seen.add(next_loc)
+                next_actions = actions.copy()
+                next_actions.append(suc[1])
+                q_.push((next_loc, next_actions))
+    return []
     util.raiseNotDefined()
 
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    # seen = set()
+    # q_ = util.PriorityQueue()
+    # q_.push((problem.getStartState(), [], 0), 0)
+    # while not q_.isEmpty():
+    #     cur, actions, cost = q_.pop()
+    #     if cur in seen:
+    #         continue
+    #     seen.add(cur)
+    #     if problem.isGoalState(cur):
+    #         return actions
+    #     for suc in problem.getSuccessors(cur):
+    #         next_loc = suc[0]
+    #         seen.add(next_loc)
+    #         next_actions = actions.copy()
+    #         next_actions.append(suc[1])
+    #         new_cost = cost + suc[2]
+    #         q_.push((next_loc, next_actions, new_cost), new_cost)
+
+    # return None
+    "*** YOUR CODE HERE ***"
+    q_ = util.PriorityQueue()
+    q_.push((problem.getStartState(), [], 0), 0)
+    seen = {}
+    while not q_.isEmpty():
+        cur, actions, cost = q_.pop()
+        if cur in seen and seen[cur] <= cost:
+            continue
+        seen[cur] = cost
+        if problem.isGoalState(cur):
+            return actions
+        for suc in problem.getSuccessors(cur):
+            next_loc = suc[0]
+            next_actions = actions.copy()
+            next_actions.append(suc[1])
+            new_cost = cost + suc[2]
+            if next_loc not in seen or new_cost < seen[next_loc]:
+                q_.push((next_loc, next_actions, new_cost), new_cost)
+
+    return []
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
@@ -109,11 +181,30 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+    q_ = util.PriorityQueue()
+    q_.push((problem.getStartState(), [], 0), 0 + heuristic(problem.getStartState(),problem))
+    seen = {}
+    while not q_.isEmpty():
+        cur, actions, cost = q_.pop()
+        if cur in seen and seen[cur] <= cost:
+            continue
+        seen[cur] = cost
+        if problem.isGoalState(cur):
+            return actions
+        for suc in problem.getSuccessors(cur):
+            next_loc = suc[0]
+            next_actions = actions.copy()
+            next_actions.append(suc[1])
+            new_cost = cost + suc[2]
+            if next_loc not in seen or new_cost < seen[next_loc]:
+                q_.push((next_loc, next_actions, new_cost), new_cost + heuristic(next_loc, problem))
+
+    return []
     util.raiseNotDefined()
 
 
 # Abbreviations
-bfs = breadthFirstSearch
+# bfs = breadthFirstSearch
 dfs = depthFirstSearch
-astar = aStarSearch
-ucs = uniformCostSearch
+# astar = aStarSearch
+# ucs = uniformCostSearch
