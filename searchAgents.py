@@ -292,6 +292,11 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.corner_index = {c: i  for i,c in enumerate(self.corners)}
+        visited = [False]*4 
+        # if self.startingPosition in self.cornerIndex:
+        #     visited[self.cornerIndex[self.startingPosition]] = True
+        self.startVisited = tuple(visited)
 
     def getStartState(self):
         """
@@ -299,6 +304,7 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
+        return (self.startingPosition, self.startVisited)
         util.raiseNotDefined()
 
     def isGoalState(self, state: Any):
@@ -306,6 +312,8 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
+        coordinates, visited = state
+        return all(visited)
         util.raiseNotDefined()
 
     def getSuccessors(self, state: Any):
@@ -320,6 +328,7 @@ class CornersProblem(search.SearchProblem):
         """
 
         successors = []
+        (x,y) , visited = state
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
             # Here's a code snippet for figuring out whether a new position hits a wall:
@@ -329,7 +338,19 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+            dx, dy = Actions.directionToVector(action)
+            next_x, next_y = int(x + dx), int(y + dy)
+            if self.walls[next_x][next_y]:
+                continue
+            next_loc = (next_x, next_y)
 
+            next_visited = list(visited)
+            if next_loc in self.corner_index:
+                idx = self.corner_index[next_loc]
+                next_visited[idx] = True
+            next_visited = tuple(next_visited)
+
+            successors.append(((next_loc, next_visited), action, 1))
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
